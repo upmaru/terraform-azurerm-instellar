@@ -15,7 +15,7 @@ variable "region" {
 
 variable "address_space" {
   description = "Address space of the virtual network"
-  default     = ["10.0.0.0/16"]
+  default     = "10.0.0.0/16"
 }
 
 variable "public_subnet_cidrs" {

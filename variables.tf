@@ -27,3 +27,17 @@ variable "default_username" {
   default     = "ubuntu"
 }
 
+variable "node_size" {
+  description = "The size of the node VMs"
+  default     = "Standard_B2pls v2"
+}
+
+variable "address_space" {
+  description = "Address space of the virtual network"
+  type        = string
+}
+
+variable "storage_size" {
+  description = "The size of the storage disks"
+  default     = 40
+}

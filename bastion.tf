@@ -1,3 +1,10 @@
+locals {
+  ssh_keys = {
+    for i, key in var.ssh_keys :
+    key => i
+  }
+}
+
 resource "azurerm_public_ip" "bastion" {
   name                = "${var.identifier}-bastion-public-ip"
   location            = var.resource_group.location
@@ -32,6 +39,15 @@ resource "azurerm_linux_virtual_machine" "bastion" {
   admin_ssh_key {
     username   = var.default_username
     public_key = tls_private_key.terraform_cloud.public_key_openssh
+  }
+
+  dynamic "admin_ssh_key" {
+    for_each = local.ssh_keys
+
+    content {
+      username   = var.default_username
+      public_key = data.azurerm_ssh_public_key.user_key[admin_ssh_key.value].public_key
+    }
   }
 
   connection {

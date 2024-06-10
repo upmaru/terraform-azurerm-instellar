@@ -17,6 +17,16 @@ variable "subnet_ids" {
   default     = []
 }
 
+variable "ssh_keys" {
+  description = "List of SSH public keys"
+  type        = list(string)
+}
+
+variable "ssh_key_resource_group_name" {
+  description = "The resource group for the SSH keys"
+  type        = string
+}
+
 variable "bastion_size" {
   description = "The size of the bastion VM"
   default     = "Standard_B1s"

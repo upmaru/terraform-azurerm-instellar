@@ -48,7 +48,6 @@ resource "azurerm_linux_virtual_machine" "bastion" {
 
   os_disk {
     caching              = "ReadWrite"
-    disk_size_gb         = 10
     storage_account_type = "Standard_LRS"
   }
 

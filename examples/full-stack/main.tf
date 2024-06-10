@@ -32,4 +32,5 @@ module "compute_primary" {
 
   resource_group = module.networking_primary.resource_group
   subnet_ids     = module.networking_primary.subnet_ids
+  address_space  = module.networking_primary.address_space
 }

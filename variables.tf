@@ -29,7 +29,7 @@ variable "default_username" {
 
 variable "node_size" {
   description = "The size of the node VMs"
-  default     = "Standard_B2pls v2"
+  default     = "Standard_B2ls_v2"
 }
 
 variable "address_space" {

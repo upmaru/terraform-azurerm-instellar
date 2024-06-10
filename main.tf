@@ -35,6 +35,11 @@ resource "azurerm_linux_virtual_machine" "bootstrap_node" {
     bastion_private_key = tls_private_key.terraform_cloud.private_key_openssh
   }
 
+  admin_ssh_key {
+    username   = var.default_username
+    public_key = tls_private_key.bastion_key.public_key_openssh
+  }
+
   network_interface_ids = [
     azurerm_network_interface.bootstrap_node.id
   ]

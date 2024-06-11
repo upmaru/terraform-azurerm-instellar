@@ -62,6 +62,12 @@ resource "azurerm_linux_virtual_machine" "bastion" {
     destination = "/home/ubuntu/.ssh/id_rsa"
   }
 
+  provisioner "remote-exec" {
+    inline = [
+      "chmod 600 /home/ubuntu/.ssh/id_rsa"
+    ]
+  }
+
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
@@ -77,4 +83,31 @@ resource "azurerm_linux_virtual_machine" "bastion" {
   tags = {
     blueprint = var.blueprint
   }
+}
+
+resource "azurerm_network_security_group" "bastion" {
+  name                = "${var.identifier}-bastion-sg"
+  location            = var.resource_group.location
+  resource_group_name = var.resource_group.name
+}
+
+resource "azurerm_network_security_rule" "allow_ssh" {
+  count = var.bastion_ssh ? 1 : 0
+
+  name                        = "${var.identifier}-bastion-ssh-sg-rule"
+  priority                    = 100
+  resource_group_name         = var.resource_group.name
+  network_security_group_name = azurerm_network_security_group.bastion.name
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "VirtualNetwork"
+  direction                   = "Inbound"
+  protocol                    = "Tcp"
+  access                      = "Allow"
+}
+
+resource "azurerm_network_interface_security_group_association" "bastion_ip_rule_association" {
+  network_interface_id      = azurerm_network_interface.bastion.id
+  network_security_group_id = azurerm_network_security_group.bastion.id
 }

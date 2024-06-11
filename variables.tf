@@ -51,3 +51,8 @@ variable "storage_size" {
   description = "The size of the storage disks"
   default     = 40
 }
+
+variable "bastion_ssh" {
+  description = "Whether to allow SSH to the bastion"
+  default     = true
+}

@@ -79,3 +79,46 @@ resource "azurerm_linux_virtual_machine" "bootstrap_node" {
     blueprint = var.blueprint
   }
 }
+
+resource "azurerm_network_security_group" "nodes" {
+  name                = "${var.identifier}-nodes-nsg"
+  location            = var.resource_group.location
+  resource_group_name = var.resource_group.name
+
+  tags = {
+    blueprint = var.blueprint
+  }
+}
+
+resource "azurerm_application_security_group" "nodes" {
+  name                = "${var.identifier}-nodes-asg"
+  location            = var.resource_group.location
+  resource_group_name = var.resource_group.name
+
+  tags = {
+    blueprint = var.blueprint
+  }
+}
+
+resource "azurerm_network_interface_application_security_group_association" "bootstrap_node" {
+  network_interface_id          = azurerm_network_interface.bootstrap_node.id
+  application_security_group_id = azurerm_application_security_group.nodes.id
+}
+
+resource "azurerm_network_security_rule" "nodes_from_bastion" {
+  name                        = "${var.identifier}-nodes-from-bastion-sg-rule"
+  network_security_group_name = azurerm_network_security_group.nodes.name
+  priority                    = 100
+  resource_group_name         = var.resource_group.name
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_application_security_group_ids = [
+    azurerm_application_security_group.bastion.id
+  ]
+  destination_application_security_group_ids = [
+    azurerm_application_security_group.nodes.id
+  ]
+  direction = "Inbound"
+  protocol  = "Tcp"
+  access    = "Allow"
+}

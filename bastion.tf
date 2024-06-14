@@ -86,9 +86,28 @@ resource "azurerm_linux_virtual_machine" "bastion" {
 }
 
 resource "azurerm_network_security_group" "bastion" {
-  name                = "${var.identifier}-bastion-sg"
+  name                = "${var.identifier}-bastion-nsg"
   location            = var.resource_group.location
   resource_group_name = var.resource_group.name
+
+  tags = {
+    blueprint = var.blueprint
+  }
+}
+
+resource "azurerm_application_security_group" "bastion" {
+  name                = "${var.identifier}-bastion-asg"
+  location            = var.resource_group.location
+  resource_group_name = var.resource_group.name
+
+  tags = {
+    blueprint = var.blueprint
+  }
+}
+
+resource "azurerm_network_interface_application_security_group_association" "bastion" {
+  network_interface_id          = azurerm_network_interface.bastion.id
+  application_security_group_id = azurerm_application_security_group.bastion.id
 }
 
 resource "azurerm_network_security_rule" "allow_ssh" {
@@ -101,10 +120,12 @@ resource "azurerm_network_security_rule" "allow_ssh" {
   source_port_range           = "*"
   destination_port_range      = "22"
   source_address_prefix       = "*"
-  destination_address_prefix  = "VirtualNetwork"
-  direction                   = "Inbound"
-  protocol                    = "Tcp"
-  access                      = "Allow"
+  destination_application_security_group_ids = [
+    azurerm_application_security_group.bastion.id
+  ]
+  direction = "Inbound"
+  protocol  = "Tcp"
+  access    = "Allow"
 }
 
 resource "azurerm_network_interface_security_group_association" "bastion_ip_rule_association" {

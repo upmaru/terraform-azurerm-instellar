@@ -35,4 +35,9 @@ module "compute_primary" {
   address_space               = module.networking_primary.address_space
   ssh_keys                    = ["zack-studio"]
   ssh_key_resource_group_name = "opsmaru"
+  cluster_topology = [
+    { id = 1, name = "01", size = "Standard_B2ls_v2" },
+    { id = 2, name = "02", size = "Standard_B2ls_v2" }
+  ]
+  storage_size = 40
 }

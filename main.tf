@@ -1,3 +1,10 @@
+locals {
+  topology = {
+    for index, node in var.cluster_topology :
+    node.name => merge(node, { subnet = node.id % length(var.subnet_ids) })
+  }
+}
+
 resource "azurerm_public_ip" "bootstrap_node" {
   name                = "${var.identifier}-bootstrap-node-public-ip"
   location            = var.resource_group.location
@@ -80,6 +87,65 @@ resource "azurerm_linux_virtual_machine" "bootstrap_node" {
   }
 }
 
+# resource "azurerm_public_ip" "nodes" {
+#   for_each = local.topology
+
+#   name                = "${var.identifier}-node -${each.key}-public-ip"
+#   location            = var.resource_group.location
+#   resource_group_name = var.resource_group.name
+#   allocation_method   = "Dynamic"
+# }
+
+resource "azurerm_network_interface" "nodes" {
+  for_each = local.topology
+
+  name                = "${var.identifier}-node-${each.key}-nic"
+  location            = var.resource_group.location
+  resource_group_name = var.resource_group.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = var.subnet_ids[each.value.subnet]
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "nodes" {
+  for_each = local.topology
+
+  name                = "${var.identifier}-node-${each.key}"
+  resource_group_name = var.resource_group.name
+  location            = var.resource_group.location
+  size                = each.value.size
+  admin_username      = var.default_username
+
+  network_interface_ids = [
+    azurerm_network_interface.nodes[each.key].id
+  ]
+
+  admin_ssh_key {
+    username   = var.default_username
+    public_key = tls_private_key.bastion_key.public_key_openssh
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    disk_size_gb         = var.storage_size
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts-gen2"
+    version   = "latest"
+  }
+
+  tags = {
+    blueprint = var.blueprint
+  }
+}
+
 resource "azurerm_network_security_group" "nodes" {
   name                = "${var.identifier}-nodes-nsg"
   location            = var.resource_group.location
@@ -121,4 +187,9 @@ resource "azurerm_network_security_rule" "nodes_from_bastion" {
   direction = "Inbound"
   protocol  = "Tcp"
   access    = "Allow"
+}
+
+resource "azurerm_network_interface_security_group_association" "bootstrap_node" {
+  network_interface_id      = azurerm_network_interface.bootstrap_node.id
+  network_security_group_id = azurerm_network_security_group.nodes.id
 }

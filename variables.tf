@@ -56,3 +56,13 @@ variable "bastion_ssh" {
   description = "Whether to allow SSH to the bastion"
   default     = true
 }
+
+variable "cluster_topology" {
+  type = list(object({
+    id   = number
+    name = string
+    size = optional(string, "Standard_B2ls_v2")
+  }))
+  description = "How many nodes do you want in your cluster?"
+  default     = []
+}

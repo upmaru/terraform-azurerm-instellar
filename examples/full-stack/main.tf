@@ -32,6 +32,7 @@ module "compute_primary" {
 
   resource_group              = module.networking_primary.resource_group
   subnet_ids                  = module.networking_primary.subnet_ids
+  vpc_id                      = module.networking_primary.vpc_id
   address_space               = module.networking_primary.address_space
   ssh_keys                    = ["zack-studio"]
   ssh_key_resource_group_name = "opsmaru"

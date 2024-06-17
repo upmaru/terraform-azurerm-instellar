@@ -1,3 +1,9 @@
+variable "protect_leader" {
+  type        = bool
+  description = "Protect the database leader node"
+  default     = true
+}
+
 variable "identifier" {
   description = "Name of the cluster"
   type        = string
@@ -15,6 +21,11 @@ variable "resource_group" {
 variable "subnet_ids" {
   description = "List of subnets"
   default     = []
+}
+
+variable "vpc_id" {
+  description = "The ID of the virtual network"
+  type        = string
 }
 
 variable "ssh_keys" {
@@ -65,4 +76,9 @@ variable "cluster_topology" {
   }))
   description = "How many nodes do you want in your cluster?"
   default     = []
+}
+
+variable "node_detail_revision" {
+  description = "The revision of the node detail"
+  default     = 1
 }

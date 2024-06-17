@@ -9,3 +9,7 @@ output "subnet_ids" {
 output "address_space" {
   value = var.address_space
 }
+
+output "vpc_id" {
+  value = azurerm_virtual_network.this.id
+}

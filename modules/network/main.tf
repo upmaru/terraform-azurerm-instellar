@@ -1,6 +1,10 @@
 resource "azurerm_resource_group" "this" {
   name     = var.identifier
   location = var.region
+
+  tags = {
+    blueprint = var.blueprint
+  }
 }
 
 resource "azurerm_virtual_network" "this" {

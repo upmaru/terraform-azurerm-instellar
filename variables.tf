@@ -23,9 +23,14 @@ variable "subnet_ids" {
   default     = []
 }
 
-variable "vpc_id" {
+variable "virtual_network_id" {
   description = "The ID of the virtual network"
   type        = string
+}
+
+variable "balancer" {
+  description = "Enable load balancer?"
+  default     = false
 }
 
 variable "ssh_keys" {

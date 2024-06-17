@@ -30,9 +30,10 @@ module "compute_primary" {
   identifier = var.identifier
   blueprint  = var.blueprint
 
+  balancer                    = true
   resource_group              = module.networking_primary.resource_group
   subnet_ids                  = module.networking_primary.subnet_ids
-  vpc_id                      = module.networking_primary.vpc_id
+  virtual_network_id          = module.networking_primary.virtual_network_id
   address_space               = module.networking_primary.address_space
   ssh_keys                    = ["zack-studio"]
   ssh_key_resource_group_name = "opsmaru"

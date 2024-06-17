@@ -25,7 +25,8 @@ resource "azurerm_public_ip" "bootstrap_node" {
   name                = "${var.identifier}-bootstrap-node-public-ip"
   location            = var.resource_group.location
   resource_group_name = var.resource_group.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
 
 resource "azurerm_network_interface" "bootstrap_node" {
@@ -109,7 +110,8 @@ resource "azurerm_public_ip" "nodes" {
   name                = "${var.identifier}-node-${each.key}-public-ip"
   location            = var.resource_group.location
   resource_group_name = var.resource_group.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
+  sku                 = "Standard"
 
   tags = {
     blueprint = var.blueprint
@@ -352,7 +354,7 @@ resource "terraform_data" "removal" {
     azurerm_linux_virtual_machine.bastion,
     azurerm_linux_virtual_machine.bootstrap_node,
     var.subnet_ids,
-    var.vpc_id,
+    var.virtual_network_id,
     azurerm_application_security_group.nodes,
     azurerm_network_security_group.nodes
   ]
@@ -373,4 +375,35 @@ resource "terraform_data" "removal" {
     when   = destroy
     inline = self.input.commands
   }
+}
+
+module "balancer" {
+  count = var.balancer ? 1 : 0
+
+  source = "./modules/balancer"
+
+  identifier         = var.identifier
+  blueprint          = var.blueprint
+  virtual_network_id = var.virtual_network_id
+  resource_group = {
+    name     = var.resource_group.name
+    location = var.resource_group.location
+  }
+
+  bootstrap_node = {
+    slug                 = azurerm_linux_virtual_machine.bootstrap_node.name
+    id                   = azurerm_linux_virtual_machine.bootstrap_node.id
+    public_ip            = azurerm_linux_virtual_machine.bootstrap_node.public_ip_address
+    network_interface_id = azurerm_network_interface.bootstrap_node.id
+  }
+
+  nodes = [
+    for key, node in azurerm_linux_virtual_machine.nodes :
+    {
+      slug                 = node.name
+      public_ip            = node.public_ip_address
+      id                   = node.id
+      network_interface_id = azurerm_network_interface.nodes[key].id
+    }
+  ]
 }

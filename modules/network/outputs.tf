@@ -10,6 +10,6 @@ output "address_space" {
   value = var.address_space
 }
 
-output "vpc_id" {
+output "virtual_network_id" {
   value = azurerm_virtual_network.this.id
 }

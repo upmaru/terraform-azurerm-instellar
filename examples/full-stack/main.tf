@@ -31,6 +31,7 @@ module "compute_primary" {
   blueprint  = var.blueprint
 
   balancer                    = true
+  bastion_ssh                 = false
   resource_group              = module.networking_primary.resource_group
   subnet_ids                  = module.networking_primary.subnet_ids
   virtual_network_id          = module.networking_primary.virtual_network_id

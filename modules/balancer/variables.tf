@@ -18,6 +18,16 @@ variable "virtual_network_id" {
   type        = string
 }
 
+variable "bastion_node" {
+  description = "The bastion node"
+  type = object({
+    id                   = string
+    slug                 = string
+    public_ip            = string
+    network_interface_id = string
+  })
+}
+
 variable "bootstrap_node" {
   description = "The bootstrap node"
   type = object({

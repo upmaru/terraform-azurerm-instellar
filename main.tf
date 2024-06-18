@@ -390,6 +390,13 @@ module "balancer" {
     location = var.resource_group.location
   }
 
+  bastion_node = {
+    slug                 = azurerm_linux_virtual_machine.bastion.name
+    id                   = azurerm_linux_virtual_machine.bastion.id
+    public_ip            = azurerm_linux_virtual_machine.bastion.public_ip_address
+    network_interface_id = azurerm_network_interface.bastion.id
+  }
+
   bootstrap_node = {
     slug                 = azurerm_linux_virtual_machine.bootstrap_node.name
     id                   = azurerm_linux_virtual_machine.bootstrap_node.id

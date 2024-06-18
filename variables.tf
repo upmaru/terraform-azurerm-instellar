@@ -73,6 +73,11 @@ variable "bastion_ssh" {
   default     = true
 }
 
+variable "publicly_accessible" {
+  description = "Whether the cluster is publicly accessible"
+  default     = true
+}
+
 variable "cluster_topology" {
   type = list(object({
     id   = number

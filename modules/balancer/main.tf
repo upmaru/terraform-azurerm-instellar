@@ -60,12 +60,12 @@ resource "azurerm_network_interface_backend_address_pool_association" "bastion" 
   backend_address_pool_id = azurerm_lb_backend_address_pool.bastion.id
 }
 
-# resource "azurerm_network_interface_backend_address_pool_association" "nodes" {
-#   for_each                = local.topology
-#   network_interface_id    = each.value.network_interface_id
-#   ip_configuration_name   = "internal"
-#   backend_address_pool_id = azurerm_lb_backend_address_pool.nodes.id
-# }
+resource "azurerm_network_interface_backend_address_pool_association" "nodes" {
+  for_each                = local.topology
+  network_interface_id    = each.value.network_interface_id
+  ip_configuration_name   = "internal"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.nodes.id
+}
 
 resource "azurerm_network_interface_backend_address_pool_association" "lxd" {
   for_each                = local.topology
@@ -86,13 +86,13 @@ resource "azurerm_lb_probe" "lxd" {
   port            = 8443
 }
 
-# resource "azurerm_lb_probe" "nodes" {
-#   for_each = local.ports
+resource "azurerm_lb_probe" "nodes" {
+  for_each = local.ports
 
-#   loadbalancer_id = azurerm_lb.this.id
-#   name            = "${each.key}-probe"
-#   port            = each.value
-# }
+  loadbalancer_id = azurerm_lb.this.id
+  name            = "${each.key}-probe"
+  port            = each.value
+}
 
 resource "azurerm_lb_rule" "bastion" {
   loadbalancer_id                = azurerm_lb.this.id
@@ -122,18 +122,18 @@ resource "azurerm_lb_rule" "lxd" {
   disable_outbound_snat = true
 }
 
-# resource "azurerm_lb_rule" "nodes" {
-#   for_each = local.ports
+resource "azurerm_lb_rule" "nodes" {
+  for_each = local.ports
 
-#   loadbalancer_id                = azurerm_lb.this.id
-#   name                           = "${each.key}-nodes-lb-rule"
-#   protocol                       = "Tcp"
-#   frontend_port                  = each.value
-#   backend_port                   = each.value
-#   frontend_ip_configuration_name = "${var.identifier}-lb-frontend-ip"
-#   backend_address_pool_ids = [
-#     azurerm_lb_backend_address_pool.nodes.id
-#   ]
-#   probe_id              = azurerm_lb_probe.nodes[each.key].id
-#   disable_outbound_snat = true
-# }
+  loadbalancer_id                = azurerm_lb.this.id
+  name                           = "${each.key}-nodes-lb-rule"
+  protocol                       = "Tcp"
+  frontend_port                  = each.value
+  backend_port                   = each.value
+  frontend_ip_configuration_name = "${var.identifier}-lb-frontend-ip"
+  backend_address_pool_ids = [
+    azurerm_lb_backend_address_pool.nodes.id
+  ]
+  probe_id              = azurerm_lb_probe.nodes[each.key].id
+  disable_outbound_snat = true
+}

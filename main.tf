@@ -377,6 +377,78 @@ resource "terraform_data" "removal" {
   }
 }
 
+resource "azurerm_network_security_rule" "allow_http" {
+  count = var.publicly_accessible ? 1 : 0
+
+  name                        = "${var.identifier}-allow-http-sg-rule"
+  priority                    = 101
+  resource_group_name         = var.resource_group.name
+  network_security_group_name = azurerm_network_security_group.nodes.name
+  source_port_range           = "*"
+  destination_port_range      = "80"
+  source_address_prefix       = "*"
+  destination_application_security_group_ids = [
+    azurerm_application_security_group.nodes.id
+  ]
+  direction = "Inbound"
+  protocol  = "Tcp"
+  access    = "Allow"
+}
+
+resource "azurerm_network_security_rule" "allow_https" {
+  count = var.publicly_accessible ? 1 : 0
+
+  name                        = "${var.identifier}-allow-https-sg-rule"
+  priority                    = 102
+  resource_group_name         = var.resource_group.name
+  network_security_group_name = azurerm_network_security_group.nodes.name
+  source_port_range           = "*"
+  destination_port_range      = "443"
+  source_address_prefix       = "*"
+  destination_application_security_group_ids = [
+    azurerm_application_security_group.nodes.id
+  ]
+  direction = "Inbound"
+  protocol  = "Tcp"
+  access    = "Allow"
+}
+
+resource "azurerm_network_security_rule" "allow_lxd" {
+  count = var.publicly_accessible ? 1 : 0
+
+  name                        = "${var.identifier}-allow-lxd-sg-rule"
+  priority                    = 103
+  resource_group_name         = var.resource_group.name
+  network_security_group_name = azurerm_network_security_group.nodes.name
+  source_port_range           = "*"
+  destination_port_range      = "8443"
+  source_address_prefix       = "*"
+  destination_application_security_group_ids = [
+    azurerm_application_security_group.nodes.id
+  ]
+  direction = "Inbound"
+  protocol  = "Tcp"
+  access    = "Allow"
+}
+
+resource "azurerm_network_security_rule" "allow_uplink" {
+  count = var.publicly_accessible ? 1 : 0
+
+  name                        = "${var.identifier}-allow-uplink-sg-rule"
+  priority                    = 104
+  resource_group_name         = var.resource_group.name
+  network_security_group_name = azurerm_network_security_group.nodes.name
+  source_port_range           = "*"
+  destination_port_range      = "49152"
+  source_address_prefix       = "*"
+  destination_application_security_group_ids = [
+    azurerm_application_security_group.nodes.id
+  ]
+  direction = "Inbound"
+  protocol  = "Tcp"
+  access    = "Allow"
+}
+
 module "balancer" {
   count = var.balancer ? 1 : 0
 
